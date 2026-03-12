@@ -18,10 +18,10 @@ CREATE INDEX "users_registration_date_index" ON
     "users"("registration_date");
 ALTER TABLE
     "users" ADD PRIMARY KEY("id");
-CREATE TABLE "Topic"(
+CREATE TABLE "topic"(
     "id" bigserial NOT NULL,
     "user_id" bigserial NOT NULL,
-    "title" BIGINT NOT NULL,
+    "title" VARCHAR(100) NOT NULL,
     "deleted_at" TIMESTAMP(0) WITH
         TIME zone NULL,
         "created_at" TIMESTAMP(0)
@@ -32,13 +32,13 @@ CREATE TABLE "Topic"(
         TIME zone NOT NULL
 );
 CREATE INDEX "topic_user_id_created_at_deleted_at_index" ON
-    "Topic"(
+    "topic"(
         "user_id",
         "created_at",
         "deleted_at"
     );
 ALTER TABLE
-    "Topic" ADD PRIMARY KEY("id");
+    "topic" ADD PRIMARY KEY("id");
 CREATE TABLE "messages"(
     "id" bigserial NOT NULL,
     "topic_id" bigserial NOT NULL,
@@ -60,11 +60,9 @@ CREATE TABLE "logs"(
     "topic_id" bigserial NULL,
     "message_id" bigserial NULL,
     "action_type" VARCHAR(20) NOT NULL,
-    "new_column" BIGINT NOT NULL,
     "server_response" BOOLEAN NOT NULL,
     "action_date" TIMESTAMP(0) WITH
-        TIME zone NOT NULL,
-        "new_column" BIGINT NOT NULL
+        TIME zone NOT NULL
 );
 CREATE INDEX "logs_action_date_index" ON
     "logs"("action_date");
@@ -77,10 +75,10 @@ ALTER TABLE
 ALTER TABLE
     "logs" ADD CONSTRAINT "logs_user_id_foreign" FOREIGN KEY("user_id") REFERENCES "users"("id");
 ALTER TABLE
-    "logs" ADD CONSTRAINT "logs_topic_id_foreign" FOREIGN KEY("topic_id") REFERENCES "Topic"("id");
+    "logs" ADD CONSTRAINT "logs_topic_id_foreign" FOREIGN KEY("topic_id") REFERENCES "topic"("id");
 ALTER TABLE
-    "messages" ADD CONSTRAINT "messages_topic_id_foreign" FOREIGN KEY("topic_id") REFERENCES "Topic"("id");
+    "messages" ADD CONSTRAINT "messages_topic_id_foreign" FOREIGN KEY("topic_id") REFERENCES "topic"("id");
 ALTER TABLE
     "logs" ADD CONSTRAINT "logs_message_id_foreign" FOREIGN KEY("message_id") REFERENCES "messages"("id");
 ALTER TABLE
-    "Topic" ADD CONSTRAINT "topic_user_id_foreign" FOREIGN KEY("user_id") REFERENCES "users"("id");
+    "topic" ADD CONSTRAINT "topic_user_id_foreign" FOREIGN KEY("user_id") REFERENCES "users"("id");
