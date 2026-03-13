@@ -20,7 +20,7 @@ ALTER TABLE
     "users" ADD PRIMARY KEY("id");
 CREATE TABLE "topic"(
     "id" bigserial NOT NULL,
-    "user_id" bigserial NOT NULL,
+    "user_id" bigint NOT NULL,
     "title" VARCHAR(100) NOT NULL,
     "deleted_at" TIMESTAMP(0) WITH
         TIME zone NULL,
@@ -41,8 +41,8 @@ ALTER TABLE
     "topic" ADD PRIMARY KEY("id");
 CREATE TABLE "messages"(
     "id" bigserial NOT NULL,
-    "topic_id" bigserial NOT NULL,
-    "user_id" bigserial NULL,
+    "topic_id" bigint NOT NULL,
+    "user_id" bigint NULL,
     "content" TEXT NOT NULL,
     "created_at" TIMESTAMP(0) WITH
         TIME zone NOT NULL,
@@ -56,9 +56,9 @@ ALTER TABLE
     "messages" ADD PRIMARY KEY("id");
 CREATE TABLE "logs"(
     "id" bigserial NOT NULL,
-    "user_id" bigserial NULL,
-    "topic_id" bigserial NULL,
-    "message_id" bigserial NULL,
+    "user_id" bigint NULL,
+    "topic_id" bigint NULL,
+    "message_id" bigint NULL,
     "action_type" VARCHAR(20) NOT NULL,
     "server_response" BOOLEAN NOT NULL,
     "action_date" TIMESTAMP(0) WITH
