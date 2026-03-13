@@ -76,3 +76,13 @@ CREATE INDEX idx_logs_message_id ON logs(message_id);
 CREATE INDEX idx_logs_date ON logs(action_date);
 CREATE INDEX idx_logs_action_type ON logs(action_type);
 CREATE INDEX idx_logs_date_action ON logs(action_date, action_type);
+ALTER TABLE "logs" ADD PRIMARY KEY("id");
+
+ALTER TABLE "topic" ADD CONSTRAINT "fk_topic_user" FOREIGN KEY ("user_id") REFERENCES "users"("id");
+
+ALTER TABLE "messages" ADD CONSTRAINT "fk_messages_topic" FOREIGN KEY ("topic_id") REFERENCES "topic"("id");
+ALTER TABLE "messages" ADD CONSTRAINT "fk_messages_user" FOREIGN KEY ("user_id") REFERENCES "users"("id");
+
+ALTER TABLE "logs" ADD CONSTRAINT "fk_logs_user" FOREIGN KEY ("user_id") REFERENCES "users"("id");
+ALTER TABLE "logs" ADD CONSTRAINT "fk_logs_topic" FOREIGN KEY ("topic_id") REFERENCES "topic"("id");
+ALTER TABLE "logs" ADD CONSTRAINT "fk_logs_message" FOREIGN KEY ("message_id") REFERENCES "messages"("id");
