@@ -14,10 +14,12 @@ CREATE TABLE "users"(
     WITH
         TIME zone NOT NULL
 );
+
 CREATE INDEX "users_registration_date_index" ON
     "users"("registration_date");
 ALTER TABLE
     "users" ADD PRIMARY KEY("id");
+
 CREATE TABLE "topic"(
     "id" bigserial NOT NULL,
     "user_id" bigint NOT NULL,
@@ -31,14 +33,14 @@ CREATE TABLE "topic"(
     WITH
         TIME zone NOT NULL
 );
-CREATE INDEX "topic_user_id_created_at_deleted_at_index" ON
-    "topic"(
-        "user_id",
-        "created_at",
-        "deleted_at"
-    );
+
+CREATE INDEX idx_topic_user_id ON topic(user_id);
+CREATE INDEX idx_topic_created_at ON topic(created_at);
+CREATE INDEX idx_topic_deleted_at ON topic(deleted_at);
+
 ALTER TABLE
     "topic" ADD PRIMARY KEY("id");
+
 CREATE TABLE "messages"(
     "id" bigserial NOT NULL,
     "topic_id" bigint NOT NULL,
@@ -50,10 +52,13 @@ CREATE TABLE "messages"(
     WITH
         TIME zone NOT NULL
 );
-CREATE INDEX "messages_topic_id_user_id_created_at_index" ON
-    "messages"("topic_id", "user_id", "created_at");
-ALTER TABLE
+
+CREATE INDEX idx_messages_topic_id ON messages(topic_id);
+CREATE INDEX idx_messages_user_id ON messages(user_id);
+CREATE INDEX idx_messages_created_at ON messages(created_at);
+ALTER TABLE 
     "messages" ADD PRIMARY KEY("id");
+
 CREATE TABLE "logs"(
     "id" bigserial NOT NULL,
     "user_id" bigint NULL,
@@ -64,21 +69,10 @@ CREATE TABLE "logs"(
     "action_date" TIMESTAMP(0) WITH
         TIME zone NOT NULL
 );
-CREATE INDEX "logs_action_date_index" ON
-    "logs"("action_date");
-CREATE INDEX "logs_action_type_index" ON
-    "logs"("action_type");
-CREATE INDEX "logs_server_response_index" ON
-    "logs"("server_response");
-ALTER TABLE
-    "logs" ADD PRIMARY KEY("id");
-ALTER TABLE
-    "logs" ADD CONSTRAINT "logs_user_id_foreign" FOREIGN KEY("user_id") REFERENCES "users"("id");
-ALTER TABLE
-    "logs" ADD CONSTRAINT "logs_topic_id_foreign" FOREIGN KEY("topic_id") REFERENCES "topic"("id");
-ALTER TABLE
-    "messages" ADD CONSTRAINT "messages_topic_id_foreign" FOREIGN KEY("topic_id") REFERENCES "topic"("id");
-ALTER TABLE
-    "logs" ADD CONSTRAINT "logs_message_id_foreign" FOREIGN KEY("message_id") REFERENCES "messages"("id");
-ALTER TABLE
-    "topic" ADD CONSTRAINT "topic_user_id_foreign" FOREIGN KEY("user_id") REFERENCES "users"("id");
+
+CREATE INDEX idx_logs_user_id ON logs(user_id);
+CREATE INDEX idx_logs_topic_id ON logs(topic_id);
+CREATE INDEX idx_logs_message_id ON logs(message_id);
+CREATE INDEX idx_logs_date ON logs(action_date);
+CREATE INDEX idx_logs_action_type ON logs(action_type);
+CREATE INDEX idx_logs_date_action ON logs(action_date, action_type);
