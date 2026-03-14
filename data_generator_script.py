@@ -11,3 +11,18 @@ import pandas as pd
 from datetime import datetime, timedelta
 from faker import Faker
 import numpy as np
+
+fake = Faker('ru_RU')
+
+#константы действий пользователя из первого пункта задания
+users_activity_types = ['first_visit', 'registration', 'logIn', 'logOut', 'topic_create', 'topic_visit', 'topic_delete', 'message_create']
+
+#количество дней между первой и последней датой для генерации данных
+first_date = datetime(2026, 2, 1)
+last_date = datetime(2026, 2, 28)
+delta = last_date - first_date + timedelta(days=1)
+
+#минимальное количество действий пользователя в день(5), действий создания темы(2)
+users_activity_min = 5
+topic_errors_min = 2
+
