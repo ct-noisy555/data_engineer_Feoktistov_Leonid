@@ -66,6 +66,15 @@ def generate_users():
     })    
     return users_df
 
+#функция генерации тем
+def generate_topics(users_df):
+    #содержание на основе структуры таблицы из .sql файла
+    topic_ids = []
+    user_ids = []
+    titles = []
+    
+
+
 
     
 

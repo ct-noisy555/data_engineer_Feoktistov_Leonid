@@ -3,16 +3,11 @@ CREATE TABLE "users"(
     "email" VARCHAR(50) NOT NULL,
     "phone" VARCHAR(20) NOT NULL,
     "nickname" VARCHAR(30) NOT NULL,
-    "registration_date" TIMESTAMP(0) WITH
-        TIME zone NOT NULL,
-        "topics_count" INTEGER NULL,
-        "messages_count" INTEGER NULL,
-        "created_at" TIMESTAMP(0)
-    WITH
-        TIME zone NOT NULL,
-        "updated_at" TIMESTAMP(0)
-    WITH
-        TIME zone NOT NULL
+    "registration_date" TIMESTAMP(0) WITH TIME zone NOT NULL,
+    "topics_count" INTEGER NULL,
+    "messages_count" INTEGER NULL,
+    "created_at" TIMESTAMP(0) WITH TIME zone NOT NULL,
+    "updated_at" TIMESTAMP(0) WITH TIME zone NOT NULL
 );
 
 CREATE INDEX "users_registration_date_index" ON
@@ -24,14 +19,9 @@ CREATE TABLE "topic"(
     "id" bigserial NOT NULL,
     "user_id" bigint NOT NULL,
     "title" VARCHAR(100) NOT NULL,
-    "deleted_at" TIMESTAMP(0) WITH
-        TIME zone NULL,
-        "created_at" TIMESTAMP(0)
-    WITH
-        TIME zone NOT NULL,
-        "updated_at" TIMESTAMP(0)
-    WITH
-        TIME zone NOT NULL
+    "deleted_at" TIMESTAMP(0) WITH TIME zone NULL,
+    "created_at" TIMESTAMP(0) WITH TIME zone NOT NULL,
+    "updated_at" TIMESTAMP(0) WITH TIME zone NOT NULL
 );
 
 CREATE INDEX idx_topic_user_id ON topic(user_id);
@@ -46,11 +36,8 @@ CREATE TABLE "messages"(
     "topic_id" bigint NOT NULL,
     "user_id" bigint NULL,
     "content" TEXT NOT NULL,
-    "created_at" TIMESTAMP(0) WITH
-        TIME zone NOT NULL,
-        "updated_at" TIMESTAMP(0)
-    WITH
-        TIME zone NOT NULL
+    "created_at" TIMESTAMP(0) WITH TIME zone NOT NULL,
+        "updated_at" TIMESTAMP(0) WITH TIME zone NOT NULL
 );
 
 CREATE INDEX idx_messages_topic_id ON messages(topic_id);
@@ -66,8 +53,7 @@ CREATE TABLE "logs"(
     "message_id" bigint NULL,
     "action_type" VARCHAR(20) NOT NULL,
     "server_response" BOOLEAN NOT NULL,
-    "action_date" TIMESTAMP(0) WITH
-        TIME zone NOT NULL
+    "action_date" TIMESTAMP(0) WITH TIME zone NOT NULL
 );
 
 CREATE INDEX idx_logs_user_id ON logs(user_id);
