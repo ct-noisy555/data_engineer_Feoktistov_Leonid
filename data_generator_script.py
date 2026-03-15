@@ -20,9 +20,21 @@ users_activity_types = ['first_visit', 'registration', 'logIn', 'logOut', 'topic
 #количество дней между первой и последней датой для генерации данных
 first_date = datetime(2026, 2, 1)
 last_date = datetime(2026, 2, 28)
-delta = last_date - first_date + timedelta(days=1)
+delta = (last_date - first_date).days + 1
 
 #минимальное количество действий пользователя в день(5), действий создания темы(2)
 users_activity_min = 5
 topic_errors_min = 2
+
+#функция генерации пользователей
+
+def generate_users(num_users):
+    users_count = random.randint(130, 200)
+
+    registration_per_day = []
+    for day in range(delta):
+        registrations = users_activity_min + random.randint(0, 3)  # Генерируем от 5 до 8 регистраций в день
+
+
+
 
