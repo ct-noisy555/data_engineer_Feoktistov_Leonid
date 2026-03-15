@@ -27,7 +27,7 @@ topic_errors_min = 2
 def generate_users():
     users_regs = []
     for day in range(delta):
-        users_regs.append(random.randint(5, 10))  # генерация количества регистраций пользователей в день
+        users_regs.append(random.randint(users_activity_min, 10))  # генерация количества регистраций пользователей в день
 
     users_ids = []
     emails = []
@@ -72,7 +72,37 @@ def generate_topics(users_df):
     topic_ids = []
     user_ids = []
     titles = []
-    
+    deleted_at = []
+    created_at = []
+    updated_at = []
+
+    current_topic_id = 1
+    for day in range(delta):  # итерация по дням для генерации данных о темах
+        for _ in range(random.randint(users_activity_min, 10)): # итерация по количеству созданных тем в течение дня  
+
+            #добавить проверку на ошибку при создании темы, если пользователь не зарегистрирован
+
+            topic_ids.append(current_topic_id)
+            user_ids.append(users_df['user_id'].sample().item()) # выбор пользователя-создателя темы из ранней генерации пользователей
+            titles.append(fake.sentence(nb_words=6))
+            
+            #сделать проверку на удаление
+
+            #добавить время создание с часами, минутами и секундами
+            created_at.append(first_date + timedelta(days=day))
+            updated_at.append(first_date + timedelta(days=day))
+            current_topic_id += 1
+
+    topics_df = pd.DataFrame({
+        'topic_id': topic_ids,
+        'user_id': user_ids,
+        'title': titles,
+        'deleted_at': deleted_at,
+        'created_at': created_at,
+        'updated_at': updated_at
+    })
+
+            
 
 
 
