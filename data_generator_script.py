@@ -1,6 +1,3 @@
-# 2. Определение функции для генерации данных
-# - определение констант для количества строк и типов данных
-# - генерация пользовательских данных (имя, возраст, адрес, дата регистрации и т.д.)
 # - создание DataFrame из сгенерированных данных
 # - возвращение DataFrame с сгенерированными данными
 # - генерация тем и аналогично тому, что выше для остальных данных таблиц
@@ -32,6 +29,32 @@ def generate_users():
     users_regs = []
     for day in range(delta):
         users_regs.append(random.randint(5, 10))  # генерация количества регистраций пользователей в день
+
+    users_ids = []
+    emails = []
+    phones = []
+    nicknames = []
+    registration_dates = []
+    topic_count = []
+    messages_count = []
+    created_at = []
+    updated_at = []
+
+    current_user_id = 1
+    for day in range(delta):    # итерация по дням для генерации данных о пользователях
+        for _ in range(users_regs[day]):  # итерация по количеству регистраций в течение дня
+            users_ids.append(current_user_id)
+            emails.append(fake.email())
+            phones.append(fake.phone_number())
+            nicknames.append(fake.user_name())
+            registration_dates.append(first_date + timedelta(days=day))
+            topic_count.append(random.randint(0, 5))    # мб удалю
+            messages_count.append(random.randint(0, 5)) # мб удалю
+            created_at.append(first_date + timedelta(days=day))
+            updated_at.append(first_date + timedelta(days=day))
+            current_user_id += 1
+
+
 
     
 
