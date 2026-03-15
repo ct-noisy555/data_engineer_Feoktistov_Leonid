@@ -24,7 +24,6 @@ users_activity_min = 5
 topic_errors_min = 2
 
 #функция генерации пользователей
-
 def generate_users():
     users_regs = []
     for day in range(delta):
@@ -54,6 +53,18 @@ def generate_users():
             updated_at.append(first_date + timedelta(days=day))
             current_user_id += 1
 
+    users_df = pd.DataFrame({
+        'user_id': users_ids,
+        'email': emails,
+        'phone': phones,
+        'nickname': nicknames,
+        'registration_date': registration_dates,
+        'topic_count': topic_count,
+        'messages_count': messages_count,
+        'created_at': created_at,
+        'updated_at': updated_at
+    })    
+    return users_df
 
 
     
