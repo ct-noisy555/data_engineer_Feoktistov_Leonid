@@ -12,14 +12,14 @@ import numpy as np
 fake = Faker('ru_RU')
 
 #константы действий пользователя из первого пункта задания
-users_activity_types = ['first_visit', 'registration', 'logIn', 'logOut', 'topic_create', 'topic_visit', 'topic_delete', 'message_create']
+users_activity_types = ['first_visit', 'registration', 'login', 'logout', 'topic_create', 'topic_visit', 'topic_delete', 'message_create']
 
 #количество дней между первой и последней датой для генерации данных
 first_date = datetime(2026, 2, 1)
 last_date = datetime(2026, 2, 28)
 delta = (last_date - first_date).days + 1
 
-#минимальное количество действий пользователя в день(5), действий создания темы(2)
+#минимальное количество действий пользователя в день(5), ошибок создания темы(2)
 users_activity_min = 5
 topic_errors_min = 2
 
@@ -49,7 +49,10 @@ def generate_users():
             registration_dates.append(first_date + timedelta(days=day))
             topic_count.append(random.randint(0, 5))    # мб удалю
             messages_count.append(random.randint(0, 5)) # мб удалю
-            created_at.append(first_date + timedelta(days=day))
+            hour = random.randint(0, 23)
+            minute = random.randint(0, 59)
+            second = random.randint(0,59)
+            created_at.append(first_date + timedelta(days=day, hours=hour, minutes=minute, seconds=second))
             updated_at.append(first_date + timedelta(days=day))
             current_user_id += 1
 
@@ -76,23 +79,39 @@ def generate_topics(users_df):
     created_at = []
     updated_at = []
 
+    topic_logs = []
     current_topic_id = 1
     for day in range(delta):  # итерация по дням для генерации данных о темах
         for _ in range(random.randint(users_activity_min, 10)): # итерация по количеству созданных тем в течение дня  
-
-            #добавить проверку на ошибку при создании темы, если пользователь не зарегистрирован
-
-            topic_ids.append(current_topic_id)
-            user_ids.append(users_df['user_id'].sample().item()) # выбор пользователя-создателя темы из ранней генерации пользователей
-            titles.append(fake.sentence(nb_words=6))
-            
-            #сделать проверку на удаление
             hour = random.randint(0, 23)
             minute = random.randint(0, 59)
             second = random.randint(0,59)
-            created_at.append(first_date + timedelta(days=day, hours=hour, minutes=minute, seconds=second))
-            updated_at.append(first_date + timedelta(days=day))
-            current_topic_id += 1
+            creation_time = first_date + timedelta(days=day, hours=hour, minutes=minute, seconds=second)
+
+            topic_create_errors = 0
+            if topic_create_errors < topic_errors_min and random.random < 0.4:      #условие для получения, как минимум, 2-х ошибок создания темы
+                topic_logs.append({
+                    'user_id': None,
+                    'topic_id': None,
+                    'message_id': None,
+                    'action_type': 'create_topic',
+                    'server_response': False,
+                    'action_date': creation_time
+                })
+                topic_create_errors += 1
+            else:
+                topic_ids.append(current_topic_id)
+                user_ids.append(users_df['user_id'].sample().item()) # выбор пользователя-создателя темы из ранней генерации пользователей
+                titles.append(fake.sentence(nb_words=6))
+                
+                #сделать проверку на удаление
+                
+                hour = random.randint(0, 23)
+                minute = random.randint(0, 59)
+                second = random.randint(0,59)
+                created_at.append(first_date + timedelta(days=day, hours=hour, minutes=minute, seconds=second))
+                updated_at.append(first_date + timedelta(days=day))
+                current_topic_id += 1
 
     topics_df = pd.DataFrame({
         'topic_id': topic_ids,
@@ -107,12 +126,3 @@ def generate_topics(users_df):
 
 #функция генерации сообщений
 def generate_messages(users_df, topics_df):
-
-
-
-    
-
-
-
-
-
