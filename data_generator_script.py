@@ -126,6 +126,15 @@ def generate_topics(users_df):
                     deleted_at.append(None)
                     current_topic_id += 1
 
+                    topic_logs.append({
+                        'user_id': user_ids[-1],
+                        'topic_id': current_topic_id - 1,
+                        'message_id': None,
+                        'action_type': 'create_topic',
+                        'server_response': True,
+                        'action_date': creation_time
+                    })  
+
     topics_df = pd.DataFrame({
         'topic_id': topic_ids,
         'user_id': user_ids,
