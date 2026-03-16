@@ -81,37 +81,50 @@ def generate_topics(users_df):
 
     topic_logs = []
     current_topic_id = 1
+
     for day in range(delta):  # итерация по дням для генерации данных о темах
-        for _ in range(random.randint(users_activity_min, 10)): # итерация по количеству созданных тем в течение дня  
+        topic_create_errors = 0
+        daily_topics_creations_number = random.randint(users_activity_min, 10)
+        for _ in range(daily_topics_creations_number): # итерация по количеству созданных тем в течение дня  
             hour = random.randint(0, 23)
             minute = random.randint(0, 59)
             second = random.randint(0,59)
             creation_time = first_date + timedelta(days=day, hours=hour, minutes=minute, seconds=second)
 
-            topic_create_errors = 0
-            if topic_create_errors < topic_errors_min and random.random < 0.4:      #условие для получения, как минимум, 2-х ошибок создания темы
-                topic_logs.append({
-                    'user_id': None,
-                    'topic_id': None,
-                    'message_id': None,
-                    'action_type': 'create_topic',
-                    'server_response': False,
-                    'action_date': creation_time
-                })
+            is_error = False
+
+            if topic_create_errors < topic_errors_min:                         #ранее была логика, что создаются первые две ошибки/был риск оказаться без ошибок вовсе
+                if random.random() < 0.3:                                      #теперь "случайно" создаются ошибки, а если остается мало тем на день - принудительно.
+                    is_error = True 
+                    topic_create_errors += 1
+
+            remaining_attempts = daily_topics_creations_number - i + 1
+            remaining_errors = topic_errors_min - topic_create_errors
+
+            if remaining_errors > remaining_attempts:
+                is_error = True
                 topic_create_errors += 1
+
+            if is_error:
+                topic_logs.append({
+                        'user_id': None,
+                        'topic_id': None,
+                        'message_id': None,
+                        'action_type': 'create_topic',
+                        'server_response': False,
+                        'action_date': creation_time
+                    })               
             else:
-                topic_ids.append(current_topic_id)
-                user_ids.append(users_df['user_id'].sample().item()) # выбор пользователя-создателя темы из ранней генерации пользователей
-                titles.append(fake.sentence(nb_words=6))
-                
-                #сделать проверку на удаление
-                
-                hour = random.randint(0, 23)
-                minute = random.randint(0, 59)
-                second = random.randint(0,59)
-                created_at.append(first_date + timedelta(days=day, hours=hour, minutes=minute, seconds=second))
-                updated_at.append(first_date + timedelta(days=day))
-                current_topic_id += 1
+                    topic_ids.append(current_topic_id)
+                    user_ids.append(users_df['user_id'].sample().item()) # выбор пользователя-создателя темы из ранней генерации пользователей
+                    titles.append(fake.sentence(nb_words=6))
+                    hour = random.randint(0, 23)
+                    minute = random.randint(0, 59)
+                    second = random.randint(0,59)
+                    created_at.append(creation_time)
+                    updated_at.append(creation_time)
+                    deleted_at.append(None)
+                    current_topic_id += 1
 
     topics_df = pd.DataFrame({
         'topic_id': topic_ids,
