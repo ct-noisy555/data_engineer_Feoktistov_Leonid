@@ -37,7 +37,7 @@ CREATE TABLE "messages"(
     "user_id" bigint NULL,
     "content" TEXT NOT NULL,
     "created_at" TIMESTAMP(0) WITH TIME zone NOT NULL,
-        "updated_at" TIMESTAMP(0) WITH TIME zone NOT NULL
+    "updated_at" TIMESTAMP(0) WITH TIME zone NOT NULL
 );
 
 CREATE INDEX idx_messages_topic_id ON messages(topic_id);

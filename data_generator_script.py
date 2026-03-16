@@ -1,6 +1,3 @@
-# - создание DataFrame из сгенерированных данных
-# - возвращение DataFrame с сгенерированными данными
-# - генерация тем и аналогично тому, что выше для остальных данных таблиц
 # 3. Вызов функции генерации данных и сохранение в файл
 
 import random
@@ -92,7 +89,6 @@ def generate_topics(users_df):
             creation_time = first_date + timedelta(days=day, hours=hour, minutes=minute, seconds=second)
 
             is_error = False
-
             if topic_create_errors < topic_errors_min:                         #ранее была логика, что создаются первые две ошибки/был риск оказаться без ошибок вовсе
                 if random.random() < 0.3:                                      #теперь "случайно" создаются ошибки, а если остается мало тем на день - принудительно.
                     is_error = True 
@@ -107,33 +103,33 @@ def generate_topics(users_df):
 
             if is_error:
                 topic_logs.append({
-                        'user_id': None,
-                        'topic_id': None,
-                        'message_id': None,
-                        'action_type': 'create_topic',
-                        'server_response': False,
-                        'action_date': creation_time
-                    })               
+                    'user_id': None,
+                    'topic_id': None,
+                    'message_id': None,
+                    'action_type': 'create_topic',
+                    'server_response': False,
+                    'action_date': creation_time
+                })               
             else:
-                    topic_ids.append(current_topic_id)
-                    user_ids.append(users_df['user_id'].sample().item()) # выбор пользователя-создателя темы из ранней генерации пользователей
-                    titles.append(fake.sentence(nb_words=6))
-                    hour = random.randint(0, 23)
-                    minute = random.randint(0, 59)
-                    second = random.randint(0,59)
-                    created_at.append(creation_time)
-                    updated_at.append(creation_time)
-                    deleted_at.append(None)
-                    current_topic_id += 1
+                topic_ids.append(current_topic_id)
+                user_ids.append(users_df['user_id'].sample().item()) # выбор пользователя-создателя темы из ранней генерации пользователей
+                titles.append(fake.sentence(nb_words=6))
+                hour = random.randint(0, 23)
+                minute = random.randint(0, 59)
+                second = random.randint(0,59)
+                created_at.append(creation_time)
+                updated_at.append(creation_time)
+                deleted_at.append(None)
+                current_topic_id += 1
 
-                    topic_logs.append({
-                        'user_id': user_ids[-1],
-                        'topic_id': current_topic_id - 1,
-                        'message_id': None,
-                        'action_type': 'create_topic',
-                        'server_response': True,
-                        'action_date': creation_time
-                    })  
+                topic_logs.append({
+                    'user_id': user_ids[-1],
+                    'topic_id': current_topic_id - 1,
+                    'message_id': None,
+                    'action_type': 'topic_create',
+                    'server_response': True,
+                    'action_date': creation_time
+                })  
 
     topics_df = pd.DataFrame({
         'topic_id': topic_ids,
@@ -148,3 +144,67 @@ def generate_topics(users_df):
 
 #функция генерации сообщений
 def generate_messages(users_df, topics_df):
+    #содержание на основе структуры таблицы из .sql файла
+    message_ids = []
+    topics_ids = []
+    users_ids = []
+    contents = []
+    created_at = []
+    updated_at = []
+
+    message_logs = []
+    current_message_id = 1
+
+    for day in range(delta): # итерация по дням для генерации данных о сообщениях
+        daily_messages_creations_number = random.randint(users_activity_min, 10)
+        loged_messages = 0
+        anon_messages = 0
+        for _ in range(daily_messages_creations_number): # итерация по созданным сообщениям в течение дня
+            hour = random.randint(0,23)
+            minute = random.randint(0, 59)
+            second = random.randint(0, 59)
+            creation_time = first_date + timedelta(days=day, hours=hour, minutes=minute, seconds=second)
+
+            is_anon = False
+
+            if anon_messages == loged_messages: #логика для определения анонимного сообщения, чтобы не было перекоса в одну из категорий. Если количество анонимных и логированных сообщений равно - выбор происходит случайно, если же одна из категорий отстает - следующее сообщение будет из этой категории
+                is_anon = random.choice([True, False])
+            elif anon_messages < loged_messages:
+                is_anon = True
+            else:
+                is_anon = False
+
+            if is_anon:
+                users_ids.append(None)
+                anon_messages += 1
+            else:
+                user_ids.append(users_df['user_id'].sample().item()) # выбор пользователя-автора сообщения из ранней генерации пользователей
+                loged_messages += 1
+                users_df.loc[users_df['user_id'] == users_ids[-1], 'messages_count'] += 1 #увеличение счетчика сообщений у пользователя при создании им сообщения
+
+            message_ids.append(current_message_id)
+            topics_ids.append(topics_df['topic_id'].sample().item())
+            contents.append(fake.text(max_nb_chars=160))
+            created_at.append(creation_time)
+            updated_at.append(creation_time)
+            current_message_id += 1
+
+            message_logs.append({
+                'user_id': users_ids[-1],
+                'topic_id': topics_ids[-1],
+                'message_id': message_ids[-1],
+                'action_type': 'message_create',
+                'server_response': True,
+                'action_date': creation_time
+            })
+
+    messages_df = pd.DataFrame({
+        'message_id': message_ids,
+        'topic_id': topics_ids,
+        'user_id': users_ids,
+        'content': contents,
+        'created_at': created_at,
+        'updated_at': updated_at
+    })
+
+    return messages_df
