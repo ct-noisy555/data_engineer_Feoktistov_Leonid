@@ -22,9 +22,6 @@ topic_errors_min = 2
 
 #функция генерации пользователей
 def generate_users():
-    users_regs = []
-    for day in range(delta):
-        users_regs.append(random.randint(users_activity_min, 10))  # генерация количества регистраций пользователей в день
 
     users_ids = []
     emails = []
@@ -38,7 +35,8 @@ def generate_users():
 
     current_user_id = 1
     for day in range(delta):    # итерация по дням для генерации данных о пользователях
-        for _ in range(users_regs[day]):  # итерация по количеству регистраций в течение дня
+        users_regs = (random.randint(users_activity_min, 10))  # генерация количества регистраций пользователей в день
+        for _ in range(users_regs):  # итерация по количеству регистраций в течение дня
             users_ids.append(current_user_id)
             emails.append(fake.email())
             phones.append(fake.phone_number())
@@ -208,3 +206,10 @@ def generate_messages(users_df, topics_df):
     })
 
     return messages_df
+
+def generate_logs(users_df, topics_df, messages_df):
+    logs = []
+    logs.extend(topic_logs)
+    logs.extend(message_logs)
+
+    
