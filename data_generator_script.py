@@ -87,9 +87,10 @@ def generate_topics(users_df):
             titles.append(fake.sentence(nb_words=6))
             
             #сделать проверку на удаление
-
-            #добавить время создание с часами, минутами и секундами
-            created_at.append(first_date + timedelta(days=day))
+            hour = random.randint(0, 23)
+            minute = random.randint(0, 59)
+            second = random.randint(0,59)
+            created_at.append(first_date + timedelta(days=day, hours=hour, minutes=minute, seconds=second))
             updated_at.append(first_date + timedelta(days=day))
             current_topic_id += 1
 
@@ -102,7 +103,10 @@ def generate_topics(users_df):
         'updated_at': updated_at
     })
 
-            
+    return topics_df
+
+#функция генерации сообщений
+def generate_messages(users_df, topics_df):
 
 
 
