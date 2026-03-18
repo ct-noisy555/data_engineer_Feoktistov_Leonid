@@ -176,7 +176,7 @@ def generate_messages(users_df, topics_df):
                 users_ids.append(None)
                 anon_messages += 1
             else:
-                user_ids.append(users_df['user_id'].sample().item()) # выбор пользователя-автора сообщения из ранней генерации пользователей
+                users_ids.append(users_df['user_id'].sample().item()) # выбор пользователя-автора сообщения из ранней генерации пользователей
                 loged_messages += 1
                 users_df.loc[users_df['user_id'] == users_ids[-1], 'messages_count'] += 1 #увеличение счетчика сообщений у пользователя при создании им сообщения
 
@@ -211,5 +211,17 @@ def generate_logs(users_df, topics_df, messages_df):
     logs = []
     logs.extend(topic_logs)
     logs.extend(message_logs)
+
+    for day in range(delta): # итерация по дням для генерации данных о действиях пользователей
+        for action in users_activity_types: # итерация по типам действий пользователей в течение дня. 
+            daily_type_actions = random.randint(users_activity_min, 10)
+            for _ in range (daily_type_actions): # итерация по количеству действий каждого типа в течение дня
+                hour = random.randint(0, 23)
+                minute = random.randint(0, 59)
+                second = random.randint(0,59)
+                action_time = first_date + timedelta(days=day, hours=hour, minutes=minute, seconds=second)
+
+
+
 
     
