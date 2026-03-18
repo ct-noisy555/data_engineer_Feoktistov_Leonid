@@ -11,10 +11,10 @@ def load_data_to_db():
     try:
         conn = psycopg2.connect(
             host = 'localhost',
-            port = 5432,
+            port = 5433,
             database = 'forum_logs',
             user = 'postgres',
-            password = 'password'
+            password = 'postgres'
         )
         cur = conn.cursor()
         print("Подключение к базе данных успешно установлено.")
