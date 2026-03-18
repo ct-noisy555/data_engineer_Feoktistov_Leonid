@@ -6,6 +6,9 @@ from datetime import datetime, timedelta
 from faker import Faker
 import numpy as np
 
+random.seed(555)
+np.random.seed(555)
+Faker.seed(555)
 fake = Faker('ru_RU')
 
 #константы действий пользователя из первого пункта задания
