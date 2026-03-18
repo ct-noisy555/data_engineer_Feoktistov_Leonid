@@ -312,7 +312,69 @@ def generate_logs(users_df, topics_df, first_visit_logs, registration_logs, topi
     
     return logs_df
                 
-logs_df.to_csv('user_activity_logs.csv', index=False)
+# запуск скрипта и сохранение данных в файлы
+if __name__ == "__main__":
+    print("Начинаю генерацию данных...")
+
+    try:
+        print("\tГенерирую пользователей...")
+        users_df, first_visit_logs, registration_logs = generate_users()
+        print(f"\tПользователи сгенерированы: {len(users_df)}")
+        print(f"\tПервые визиты сгенерированы: {len(first_visit_logs)}")
+        print(f"\tРегистрации сгенерированы: {len(registration_logs)}")
+
+    except Exception as e:
+        print(f"Ошибка при генерации пользователей: {e}")
+        raise
+
+    try:
+        print("\tГенерирую темы...")
+        topics_df, topic_logs = generate_topics(users_df)
+        print(f"\tТем сгенерировано: {len(topics_df)}")
+        print(f"\tЛоги тем сгенерированы: {len(topic_logs)}")
+
+    except Exception as e:
+        print(f"Ошибка при генерации тем: {e}")
+        raise
+
+    try:
+        print("\tГенерирую сообщения...")
+        messages_df, message_logs = generate_messages(users_df, topics_df)
+        print(f"\tСообщений сгенерировано: {len(messages_df)}")
+        print(f"\tЛоги сообщений сгенерированы: {len(message_logs)}")
+
+    except Exception as e:
+        print(f"Ошибка при генерации сообщений: {e}")
+        raise
+
+    try: 
+        print("\tГенерирую остальные логи...")
+        logs_df = generate_logs(users_df, topics_df, first_visit_logs, registration_logs, topic_logs, message_logs)
+        print(f"\tЛогов сгенерировано: {len(logs_df)}")
+
+    except Exception as e:
+        print(f"Ошибка при генерации логов: {e}")
+        raise
+
+    print("Генерация данных завершена. \nСохраняю данные в файлы...")
+
+    try:
+        users_df.to_csv('users.csv', index=False)
+        print("\tПользователи сохранены в users.csv")
+
+        topics_df.to_csv('topics.csv', index=False)
+        print("\tТемы сохранены в topics.csv")
+
+        messages_df.to_csv('messages.csv', index=False)
+        print("\tСообщения сохранены в messages.csv")
+
+        logs_df.to_csv('logs.csv', index=False)
+        print("\tЛоги сохранены в logs.csv")
+
+    except Exception as e:
+        print(f"Ошибка при сохранении данных: {e}")
+        raise
+    print("Все данные успешно сохранены!")
 
 
 
