@@ -28,8 +28,8 @@ def generate_users():
     phones = []
     nicknames = []
     registration_dates = []
-    topic_count = 0
-    messages_count = 0
+    topic_count = []
+    messages_count = []
     created_at = []
     updated_at = []
 
@@ -44,6 +44,8 @@ def generate_users():
             phones.append(fake.phone_number())
             nicknames.append(fake.user_name())
             registration_dates.append(first_date + timedelta(days=day)) 
+            topic_count.append(0)
+            messages_count.append(0)
             hour = random.randint(0, 23)
             minute = random.randint(0, 59)
             second = random.randint(0,59)
@@ -81,7 +83,7 @@ def generate_users():
         'created_at': created_at,
         'updated_at': updated_at
     })    
-    return users_df
+    return users_df, first_visit_logs, registration_logs
 
 #функция генерации тем
 def generate_topics(users_df):
@@ -99,7 +101,7 @@ def generate_topics(users_df):
     for day in range(delta):  # итерация по дням для генерации данных о темах
         topic_create_errors = 0
         daily_topics_creations_number = random.randint(users_activity_min, 10)
-        for _ in range(daily_topics_creations_number): # итерация по количеству созданных тем в течение дня  
+        for topic in range(daily_topics_creations_number): # итерация по количеству созданных тем в течение дня  
             hour = random.randint(0, 23)
             minute = random.randint(0, 59)
             second = random.randint(0,59)
@@ -111,7 +113,7 @@ def generate_topics(users_df):
                     is_error = True 
                     topic_create_errors += 1
 
-            remaining_attempts = daily_topics_creations_number - i + 1
+            remaining_attempts = daily_topics_creations_number - topic + 1
             remaining_errors = topic_errors_min - topic_create_errors
 
             if remaining_errors > remaining_attempts:
@@ -236,10 +238,10 @@ def generate_logs(users_df, topics_df, first_visit_logs, registration_logs, topi
     logs.extend(message_logs)
 
     activity_types_to_remove = ['first_visit', 'registration', 'topic_create', 'message_create']
-    users_activity_types = [action for action in users_activity_types if action not in activity_types_to_remove] #оставляем в списке типов действий только те, которые не были учтены в логах при генерации пользователей, тем и сообщений
+    remaining_actions = [action for action in users_activity_types if action not in activity_types_to_remove] #оставляем в списке типов действий только те, которые не были учтены в логах при генерации пользователей, тем и сообщений
 
     for day in range(delta): # итерация по дням для генерации данных о действиях пользователей
-        for action in users_activity_types: # итерация по типам действий пользователей в течение дня. 
+        for action in remaining_actions: # итерация по типам действий пользователей в течение дня. 
             daily_type_actions = random.randint(users_activity_min, 10)
             for _ in range (daily_type_actions): # итерация по количеству действий каждого типа в течение дня
                 hour = random.randint(0, 23)
@@ -247,7 +249,7 @@ def generate_logs(users_df, topics_df, first_visit_logs, registration_logs, topi
                 second = random.randint(0,59)
                 action_time = first_date + timedelta(days=day, hours=hour, minutes=minute, seconds=second)
 
-            # users_activity_types = ['login', 'logout',  'topic_visit', 'topic_delete'] - оставшиеся типы действий пользователей
+            # ['login', 'logout',  'topic_visit', 'topic_delete'] - оставшиеся типы действий пользователей
                 if action == 'topic_delete':
                     topic = topics_df.sample().iloc[0] #выбираем случайную тему для удаления
                     if topic['deleted_at'] is None: #проверяем, что тема еще не удалена
@@ -296,7 +298,7 @@ def generate_logs(users_df, topics_df, first_visit_logs, registration_logs, topi
                             'server_response': False,
                             'action_date': action_time
                         })
-                else: action in ['login', 'logout']:
+                elif action in ['login', 'logout']:
                     user_id = users_df['user_id'].sample().item()
                     logs.append({
                         'user_id': user_id,
@@ -310,7 +312,7 @@ def generate_logs(users_df, topics_df, first_visit_logs, registration_logs, topi
     
     return logs_df
                 
-
+logs_df.to_csv('user_activity_logs.csv', index=False)
 
 
 
