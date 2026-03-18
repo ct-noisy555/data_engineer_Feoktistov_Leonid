@@ -33,6 +33,8 @@ def generate_users():
     created_at = []
     updated_at = []
 
+    first_visit_logs = []
+    registration_logs = []
     current_user_id = 1
     for day in range(delta):    # итерация по дням для генерации данных о пользователях
         users_regs = (random.randint(users_activity_min, 10))  # генерация количества регистраций пользователей в день
@@ -50,6 +52,25 @@ def generate_users():
             created_at.append(first_date + timedelta(days=day, hours=hour, minutes=minute, seconds=second))
             updated_at.append(first_date + timedelta(days=day))
             current_user_id += 1
+
+            first_visit_time = created_at[-1] - timedelta(minutes=random.randint(1, 60)) #логика для генерации времени первого визита, который происходит за 1-60 минут до регистрации
+            first_visit_logs.append({
+                'user_id': users_ids[-1],
+                'topic_id': None,
+                'message_id': None,
+                'action_type': 'first_visit',
+                'server_response': True,
+                'action_date': first_visit_time
+            })
+
+            registration_logs.append({
+                'user_id': users_ids[-1],
+                'topic_id': None,
+                'message_id': None,
+                'action_type': 'registration',
+                'server_response': True,
+                'action_date': created_at[-1]
+            })
 
     users_df = pd.DataFrame({
         'user_id': users_ids,
@@ -221,6 +242,16 @@ def generate_logs(users_df, topics_df, messages_df):
                 second = random.randint(0,59)
                 action_time = first_date + timedelta(days=day, hours=hour, minutes=minute, seconds=second)
 
+                if action == 'first_visit':
+                    logs.append({
+                        'user_id': None,
+                        'topic_id': None,
+                        'message_id': None,
+                        'action_type': 'first_visit',
+                        'server_response': True,
+                        'action_date': action_time
+                    })
+                elif action == 'registration':
 
 
 
