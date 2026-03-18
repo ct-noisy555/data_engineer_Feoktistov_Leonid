@@ -228,10 +228,15 @@ def generate_messages(users_df, topics_df):
 
     return messages_df
 
-def generate_logs(users_df, topics_df, messages_df):
+def generate_logs(users_df, topics_df, messages_df, first_visit_logs, registration_logs, topic_logs, message_logs):
     logs = []
+    logs.extend(first_visit_logs)
+    logs.extend(registration_logs)
     logs.extend(topic_logs)
     logs.extend(message_logs)
+
+    activity_types_to_remove = ['first_visit', 'registration', 'topic_create', 'message_create']
+    users_activity_types = [action for action in users_activity_types if action not in activity_types_to_remove] #оставляем в списке типов действий только те, которые не были учтены в логах при генерации пользователей, тем и сообщений
 
     for day in range(delta): # итерация по дням для генерации данных о действиях пользователей
         for action in users_activity_types: # итерация по типам действий пользователей в течение дня. 
@@ -242,16 +247,57 @@ def generate_logs(users_df, topics_df, messages_df):
                 second = random.randint(0,59)
                 action_time = first_date + timedelta(days=day, hours=hour, minutes=minute, seconds=second)
 
-                if action == 'first_visit':
-                    logs.append({
-                        'user_id': None,
-                        'topic_id': None,
-                        'message_id': None,
-                        'action_type': 'first_visit',
-                        'server_response': True,
-                        'action_date': action_time
-                    })
-                elif action == 'registration':
+            # users_activity_types = ['login', 'logout',  'topic_visit', 'topic_delete'] - оставшиеся типы действий пользователей
+                if action == 'topic_delete':
+                    topic = topics_df.sample().iloc[0] #выбираем случайную тему для удаления
+                    if topic['deleted_at'] is None: #проверяем, что тема еще не удалена
+                        topics_df.loc[topics_df['topic_id'] == topic['topic_id'], 'deleted_at'] = action_time #устанавливаем время удаления темы
+                        logs.append({
+                            'user_id': topic['user_id'],
+                            'topic_id': topic['topic_id'],
+                            'message_id': None,
+                            'action_type': 'topic_delete',
+                            'server_response': True,
+                            'action_date': action_time
+                        })
+                    else: 
+                        logs.append({
+                            'user_id': topic['user_id'],
+                            'topic_id': topic['topic_id'],
+                            'message_id': None,
+                            'action_type': 'topic_delete',
+                            'server_response': False,
+                            'action_date': action_time
+                        })
+                elif: action == 'topic_visit':
+                    topic = topics_df.sample().iloc[0] #выбираем случайную тему для посещения
+                    is_anon = random.choice([True, False])
+                    # подумал, что будет уместно добавить анонимность юзера не только к написанию сообщения, ведь еще на тему зайти нужно
+                    if is_anon:
+                        user_id = None
+                    else:
+                        user_id = users_df['user_id'].sample().item() 
+
+                    if topic['deleted_at'] is None:
+                        logs.append({
+                            'user_id': user_id,
+                            'topic_id': topic['topic_id'],
+                            'message_id': None,
+                            'action_type': 'topic_visit',
+                            'server_response': True,
+                            'action_date': action_time
+                        })
+                    else:
+                        logs.append({
+                            'user_id': user_id,
+                            'topic_id': topic['topic_id'],
+                            'message_id': None,
+                            'action_type': 'topic_visit',
+                            'server_response': False,
+                            'action_date': action_time
+                        })
+
+
 
 
 
