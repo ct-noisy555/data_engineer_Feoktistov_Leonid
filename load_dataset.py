@@ -46,7 +46,8 @@ def insert_users_to_db(cur, users_df, conn):
 
 def insert_topics_to_db(cur, topics_df, conn):
     try:
-        data = [tuple(x) for x in topics_df.to_numpy()] # преобразуем DataFrame в список кортежей
+        topics_df_clean = topics_df.replace({np.nan: None})
+        data = [tuple(x) for x in topics_df_clean.to_numpy()] # преобразуем DataFrame в список кортежей
         execute_values(cur, "INSERT INTO topic(id, user_id, title, deleted_at, created_at, updated_at) VALUES %s", data)
         conn.commit()
         print("Данные тем успешно вставлены в базу данных.")
@@ -57,7 +58,8 @@ def insert_topics_to_db(cur, topics_df, conn):
 
 def insert_messages_to_db(cur, messages_df, conn):
     try:
-        data = [tuple(x) for x in messages_df.to_numpy()] # преобразуем DataFrame в список кортежей
+        messages_df_clean = messages_df.replace({np.nan: None})
+        data = [tuple(x) for x in messages_df_clean.to_numpy()] # преобразуем DataFrame в список кортежей
         execute_values(cur, "INSERT INTO messages (id, topic_id, user_id, content, created_at, updated_at) VALUES %s", data)
         conn.commit()
         print("Данные сообщений успешно вставлены в базу данных.")
@@ -68,7 +70,8 @@ def insert_messages_to_db(cur, messages_df, conn):
 
 def insert_logs_to_db(cur, logs_df, conn):
     try:
-        data = [tuple(x) for x in logs_df.to_numpy()] # преобразуем DataFrame в список кортежей
+        logs_df_clean = logs_df.replace({np.nan: None})
+        data = [tuple(x) for x in logs_df_clean.to_numpy()] # преобразуем DataFrame в список кортежей
         execute_values(cur, "INSERT INTO logs (id, user_id, topic_id, message_id, action_type, server_response, action_date) VALUES %s", data)
         conn.commit()
         print("Данные логов успешно вставлены в базу данных.")
