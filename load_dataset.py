@@ -12,7 +12,7 @@ def load_data_to_db():
         conn = psycopg2.connect(
             host = 'localhost',
             port = 5432,
-            database = 'forum_db',
+            database = 'forum_logs',
             user = 'postgres',
             password = 'password'
         )
@@ -77,6 +77,45 @@ def insert_logs_to_db(cur, logs_df, conn):
         conn.rollback()
         raise
 
+if __name__ == "__main__":
+    try:
+        print("Загрузка данных из CSV файлов и вставка в базу данных...")
+        cur, users_df, topics_df, messages_df, logs_df, conn = load_data_to_db()
+    except Exception as e:
+        print(f"Ошибка при загрузке данных из CSV файлов: {e}")
+        raise
+    try:
+        print("\tНачинаю вставку данных пользователей в базу данных...")
+        insert_users_to_db(cur, users_df, conn)
+    except Exception as e:
+        print(f"Ошибка при вставке данных пользователей: {e}")
+        conn.rollback()
+        raise
+    try:
+        print("\tВставляю данные тем в базу данных...")
+        insert_topics_to_db(cur, topics_df, conn)
+    except Exception as e:
+        print(f"Ошибка при вставке данных тем: {e}")
+        conn.rollback()
+        raise
+    try:
+        print("\tВставляю данные сообщений в базу данных...")
+        insert_messages_to_db(cur, messages_df, conn)
+    except Exception as e:
+        print(f"Ошибка при вставке данных сообщений: {e}")
+        conn.rollback()
+        raise
+    try:
+        print("\tВставляю данные логов в базу данных...")
+        insert_logs_to_db(cur, logs_df, conn)
+    except Exception as e:
+        print(f"Ошибка при вставке данных логов: {e}")
+        conn.rollback()
+        raise
+    finally:
+        cur.close()
+        conn.close()
+        print("Подключение к базе данных закрыто.")
 
 
 
