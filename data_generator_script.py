@@ -161,7 +161,7 @@ def generate_topics(users_df):
         'updated_at': updated_at
     })
 
-    return topics_df
+    return topics_df, topics_logs
 
 #функция генерации сообщений
 def generate_messages(users_df, topics_df):
@@ -228,7 +228,7 @@ def generate_messages(users_df, topics_df):
         'updated_at': updated_at
     })
 
-    return messages_df
+    return messages_df, messages_logs
 
 def generate_logs(users_df, topics_df, first_visit_logs, registration_logs, topic_logs, message_logs):
     logs = []
