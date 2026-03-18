@@ -359,16 +359,16 @@ if __name__ == "__main__":
     print("Генерация данных завершена. \nСохраняю данные в файлы...")
 
     try:
-        users_df.to_csv('users.csv', index=False)
+        users_df.to_csv('users.csv', index=False, encoding='utf-8-sig')
         print("\tПользователи сохранены в users.csv")
 
-        topics_df.to_csv('topics.csv', index=False)
+        topics_df.to_csv('topics.csv', index=False, encoding='utf-8-sig')
         print("\tТемы сохранены в topics.csv")
 
-        messages_df.to_csv('messages.csv', index=False)
+        messages_df.to_csv('messages.csv', index=False, encoding='utf-8-sig')
         print("\tСообщения сохранены в messages.csv")
 
-        logs_df.to_csv('logs.csv', index=False)
+        logs_df.to_csv('logs.csv', index=False, encoding='utf-8-sig')
         print("\tЛоги сохранены в logs.csv")
 
     except Exception as e:
