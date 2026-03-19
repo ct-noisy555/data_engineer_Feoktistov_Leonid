@@ -1,6 +1,7 @@
 import pandas as pd
 import psycopg2
 from psycopg2.extras import execute_values
+import numpy as np
 
 USERS_CSV = 'users.csv'
 TOPICS_CSV = 'topics.csv'
@@ -32,6 +33,16 @@ def load_data_to_db():
         print(f"Ошибка при загрузке данных из CSV файлов: {e}")
         raise
     return cur, users_df, topics_df, messages_df, logs_df, conn
+
+def clear_tables(cur, conn):
+    try:
+        cur.execute("TRUNCATE TABLE logs, messages, topic, users RESTART IDENTITY CASCADE;")
+        conn.commit()
+        print("Таблицы успешно очищены.")
+    except Exception as e:
+        print(f"Ошибка при очистке таблиц: {e}")
+        conn.rollback()
+        raise
 
 def insert_users_to_db(cur, users_df, conn):
     try:
@@ -87,6 +98,14 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Ошибка при загрузке данных из CSV файлов: {e}")
         raise
+
+    try:
+        print("Очищаю таблицы в базе данных перед вставкой новых данных...")
+        clear_tables(cur, conn)
+    except Exception as e:
+        print(f"Ошибка при очистке таблиц: {e}")
+        raise
+
     try:
         print("\tНачинаю вставку данных пользователей в базу данных...")
         insert_users_to_db(cur, users_df, conn)
