@@ -83,7 +83,7 @@ def insert_logs_to_db(cur, logs_df, conn):
     try:
         logs_df_clean = logs_df.replace({np.nan: None})
         data = [tuple(x) for x in logs_df_clean.to_numpy()] # преобразуем DataFrame в список кортежей
-        execute_values(cur, "INSERT INTO logs (id, user_id, topic_id, message_id, action_type, server_response, action_date) VALUES %s", data)
+        execute_values(cur, "INSERT INTO logs (user_id, topic_id, message_id, action_type, server_response, action_date) VALUES %s", data)
         conn.commit()
         print("Данные логов успешно вставлены в базу данных.")
     except Exception as e:
