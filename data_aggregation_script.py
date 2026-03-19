@@ -122,7 +122,7 @@ def topic_changes(cur, start_date, end_date):
             case
                 when lag(total_topics) over (order by day) > 0
                 then round(
-                    ((total-topics - lag(total_topics) over (order by day))::float / lag(total_topics) over (order by day) * 100)::numeric, 2
+                    ((total_topics - lag(total_topics) over (order by day))::float / lag(total_topics) over (order by day) * 100)::numeric, 2
                 )
                 else 0
             end as percentage_change
@@ -133,6 +133,10 @@ def topic_changes(cur, start_date, end_date):
     return pd.DataFrame(cur.fetchall(), columns=['day', 'total_topics', 'previous_total', 'percentage_change'])
 
 def merge_data(new_accounts_df, messages_df, topic_changes_df):           #в реальности такая функция точно не будет использоваться, нет многих проверок, но, для задания пойдет. Времени нет уже(
+    for df in [new_accounts_df, messages_df, topic_changes_df]:
+        if 'day' in df.columns:
+            df['day'] = pd.to_datetime(df['day'])
+            
     merged_df = pd.merge(new_accounts_df, messages_df, on='day', how='outer')
     merged_df = pd.merge(merged_df, topic_changes_df, on='day', how='outer')
     merged_df['day'] = merged_df['day'].dt.strftime('%Y-%m-%d')
