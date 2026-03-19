@@ -132,5 +132,67 @@ def topic_changes(cur, start_date, end_date):
     cur.execute(query, (start_date, end_date))
     return pd.DataFrame(cur.fetchall(), columns=['day', 'total_topics', 'previous_total', 'percentage_change'])
 
+def merge_data(new_accounts_df, messages_df, topic_changes_df):           #в реальности такая функция точно не будет использоваться, нет многих проверок, но, для задания пойдет. Времени нет уже(
+    merged_df = pd.merge(new_accounts_df, messages_df, on='day', how='outer')
+    merged_df = pd.merge(merged_df, topic_changes_df, on='day', how='outer')
+    merged_df['day'] = merged_df['day'].dt.strftime('%Y-%m-%d')
+    return merged_df
 
+if __name__ == "__main__":
+    print("Начинаю агрегацию данных из базы данных...")
 
+    args = parse_arguments()
+
+    try:
+        start_date, end_date = validate_dates(args)
+        print(f"Используемый период: с {start_date.strftime('%Y-%m-%d')} по {end_date.strftime('%Y-%m-%d')}")
+    except Exception as e:
+        print(f"Ошибка при валидации дат: {e}")
+        raise
+
+    conn, cur = connect_to_db()
+
+    try:
+        print("\tПолучаю данные по новым аккаунтам...")
+        new_accounts_df = new_accounts(cur, start_date, end_date)
+        print("Данные по новым аккаунтам успешно получены.")
+    except Exception as e:
+        print(f"Ошибка при получении данных по новым аккаунтам: {e}")
+        raise
+
+    try:
+        print("\tПолучаю данные по сообщениям...")
+        messages_df = messages(cur, start_date, end_date)
+        print("Данные по сообщениям успешно получены.")
+    except Exception as e:
+        print(f"Ошибка при получении данных по сообщениям: {e}")
+        raise
+
+    try:
+        print("\tПолучаю данные по изменениям тем...")
+        topic_changes_df = topic_changes(cur, start_date, end_date)
+        print("Данные по изменениям тем успешно получены.")
+    except Exception as e:
+        print(f"Ошибка при получении данных по изменениям тем: {e}")
+        raise
+
+    try:
+        print("\tОбъединяю данные в один DataFrame...")
+        merged_df = merge_data(new_accounts_df, messages_df, topic_changes_df)
+        print("Данные успешно объединены.")
+    except Exception as e:
+        print(f"Ошибка при объединении данных: {e}")
+        raise
+
+    try:
+        print(f"\tСохраняю объединенные данные в CSV файл: {args.output_file}...")
+        merged_df.to_csv(args.output_file, index=False, encoding='utf-8-sig')
+        print("Данные успешно сохранены в CSV файл.")
+    except Exception as e:
+        print(f"Ошибка при сохранении данных в CSV файл: {e}")
+        conn.rollback()
+        raise
+    finally:
+        cur.close()
+        conn.close()
+        print("Подключение к базе данных закрыто.")
