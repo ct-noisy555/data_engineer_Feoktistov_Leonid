@@ -1,7 +1,4 @@
 # Скрипт для агрегации логов форума и сохранения их в CSV файл
-# парс даты в любом формате....
-# подключение к БД
-# проверка валидации данных
 # агрегация данных по заданию
 # сохранение в CSV файл
 
@@ -54,12 +51,86 @@ def connect_to_db():
                 user = 'postgres',
                 password = 'postgres'
             )
-            cur = conn.cursor()
-            print("Подключение к базе данных успешно установлено.")
+        cur = conn.cursor()
+        print("Подключение к базе данных успешно установлено.")
     except Exception as e:
         print(f"Ошибка при подключении к базе данных: {e}")
         raise
     return conn, cur
+
+def new_accounts(cur, start_date, end_date):
+    query = """
+        SELECT
+            DATE_TRUNC('day', registration_date) as day,
+            count(*) as new_accounts
+        FROM users
+        WHERE registration_date >= %s AND registration_date <= %s
+        GROUP BY day
+        ORDER BY day;
+        """
+    cur.execute(query, (start_date, end_date))
+    return pd.DataFrame(cur.fetchall(), columns=['day', 'new_accounts'])
+
+def messages(cur, start_date, end_date):
+    query = """
+        SELECT 
+            DATE(action_date) as day,
+            COUNT(*) as total_messages,
+            COUNT(*) FILTER (where user_id is null) as anon_messages
+            from logs
+            where action_type = 'write_message' and action_date >= %s and action_date <= %s
+            group by day
+            order by day;
+        """
+    cur.execute(query, (start_date, end_date))
+    message_df = cur.fetchall()
+
+    percentages = []
+    for row in message_df:
+        day, total_messages, anon_messages = row
+        percent = (anon_messages / total_messages * 100) if total_messages > 0 else 0
+        percentages.append({
+            'day': day,
+            'anon_messages_percentage': percent,
+            'total_messages': total_messages,
+        })
+    return pd.DataFrame(percentages, columns=['day', 'anon_messages_percentage', 'total_messages'])
+
+def topic_changes(cur, start_date, end_date):
+    query = """
+        with daily_topics as (
+            select 
+                DATE(action_date) as day,
+                sum(case when action_type = 'create_topic' and server_response = true then 1 else 0 end) as created,
+                sum(case when action_type = 'delete_topic' and server_response = true then 1 else 0 end) as deleted
+            from logs
+            where action_type in ('create_topic', 'delete_topic') and action_date >= %s and action_date <= %s
+            group by date(action_date)
+            ),
+        cumulative as (
+            select 
+                day,
+                created,
+                deleted,
+                sum(created-deleted) over (order by day) as total_topics
+            from daily_topics
+        )
+        select 
+            day,
+            total_topics,
+            lag(total_topics) over (order by day) as previous_total,
+            case
+                when lag(total_topics) over (order by day) > 0
+                then round(
+                    ((total-topics - lag(total_topics) over (order by day))::float / lag(total_topics) over (order by day) * 100)::numeric, 2
+                )
+                else 0
+            end as percentage_change
+        from cumulative
+        order by day;
+        """
+    cur.execute(query, (start_date, end_date))
+    return pd.DataFrame(cur.fetchall(), columns=['day', 'total_topics', 'previous_total', 'percentage_change'])
 
 
 
