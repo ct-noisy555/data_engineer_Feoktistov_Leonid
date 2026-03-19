@@ -136,7 +136,9 @@ def merge_data(new_accounts_df, messages_df, topic_changes_df):           #в р
     for df in [new_accounts_df, messages_df, topic_changes_df]:
         if 'day' in df.columns:
             df['day'] = pd.to_datetime(df['day'])
-            
+            if df['day'].dt.tz is not None:
+                df['day'] = df['day'].dt.tz_localize(None)
+
     merged_df = pd.merge(new_accounts_df, messages_df, on='day', how='outer')
     merged_df = pd.merge(merged_df, topic_changes_df, on='day', how='outer')
     merged_df['day'] = merged_df['day'].dt.strftime('%Y-%m-%d')
