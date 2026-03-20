@@ -30,22 +30,30 @@ data_engineer_Feoktistov_Leonid/
 
 ## Запуск базы данных
 Запуск PostgreSQL в Docker:
-</> Bash
+``` bash
 docker-compose up -d
+```
 
 ## Инициализация базы
 После запуска контейнера создаются таблицы из файла
+``` bash
 init.sql
+```
 
 ## Загрузка данных
-</> 
+``` bash
 python load_dataset.py
+```
 Скрипт загружает данные из CSV файлов в базу.
 
 ## Агрегация данных
 Скрипт:
+``` bash
     python data_aggregation_script.py
+```
 Формирует итоговый CSV:
+``` bash
     aggregated_logs.csv
+```
 
 
