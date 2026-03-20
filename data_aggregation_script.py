@@ -64,7 +64,7 @@ def new_accounts(cur, start_date, end_date):
             DATE_TRUNC('day', registration_date) as day,
             count(*) as new_accounts
         FROM users
-        WHERE registration_date >= %s AND registration_date <= %s
+        WHERE registration_date >= %s AND registration_date <= %s + interval '1 day' - interval '1 second'
         GROUP BY day
         ORDER BY day;
         """
@@ -74,38 +74,29 @@ def new_accounts(cur, start_date, end_date):
 def messages(cur, start_date, end_date):
     query = """
         SELECT 
-            DATE(action_date) as day,
+            DATE_TRUNC('day', action_date) as day,
             COUNT(*) as total_messages,
-            COUNT(*) FILTER (where user_id is null) as anon_messages
+            (COUNT(*) FILTER (where user_id is null) * 100.0 / nullif(COUNT(*), 0)) as anon_messages_percentage
             from logs
-            where action_type = 'write_message' and action_date >= %s and action_date <= %s
+            where action_type = 'write_message' and action_date >= %s and action_date <= %s + interval '1 day' - interval '1 second'
             group by day
             order by day;
         """
     cur.execute(query, (start_date, end_date))
     message_df = cur.fetchall()
 
-    percentages = []
-    for row in message_df:
-        day, total_messages, anon_messages = row
-        percent = (anon_messages / total_messages * 100) if total_messages > 0 else 0
-        percentages.append({
-            'day': day,
-            'anon_messages_percentage': percent,
-            'total_messages': total_messages,
-        })
-    return pd.DataFrame(percentages, columns=['day', 'anon_messages_percentage', 'total_messages'])
+    return pd.DataFrame(message_df, columns=['day', 'anon_messages_percentage', 'total_messages'])
 
 def topic_changes(cur, start_date, end_date):
     query = """
         with daily_topics as (
             select 
-                DATE(action_date) as day,
+                DATE_TRUNC('day', action_date) as day,
                 sum(case when action_type = 'create_topic' and server_response = true then 1 else 0 end) as created,
                 sum(case when action_type = 'delete_topic' and server_response = true then 1 else 0 end) as deleted
             from logs
-            where action_type in ('create_topic', 'delete_topic') and action_date >= %s and action_date <= %s
-            group by date(action_date)
+            where action_type in ('create_topic', 'delete_topic') and action_date >= %s and action_date <= %s + interval '1 day' - interval '1 second'
+            group by DATE_TRUNC('day', action_date)
             ),
         cumulative as (
             select 
@@ -115,17 +106,11 @@ def topic_changes(cur, start_date, end_date):
                 sum(created-deleted) over (order by day) as total_topics
             from daily_topics
         )
-        select 
+        select
             day,
             total_topics,
             lag(total_topics) over (order by day) as previous_total,
-            case
-                when lag(total_topics) over (order by day) > 0
-                then round(
-                    ((total_topics - lag(total_topics) over (order by day))::float / lag(total_topics) over (order by day) * 100)::numeric, 2
-                )
-                else 0
-            end as percentage_change
+            coalesce((total_topics - lag(total_topics) over (order by day)) * 100.0 / nullif(lag(total_topics) over (order by day), 0), 0) as percentage_change
         from cumulative
         order by day;
         """
