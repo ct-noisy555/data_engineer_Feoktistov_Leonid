@@ -3,6 +3,8 @@
 Проект генерирует тестовые данные за месяц, загружает их в PostgreSQL и формирует агрегированный датасет.
 
 ## Структура проекта
+
+```
 data_engineer_Feoktistov_Leonid/
 ├── DB_schema_DrawSQL.jpg      # диаграмма схемы базы данных
 ├── docker-compose.yml         # запуск PostgreSQL в Docker
@@ -18,6 +20,7 @@ data_engineer_Feoktistov_Leonid/
 ├── logs.csv                   # сгенерированные логи
 │
 └── aggregated_logs.csv        # результат агрегации
+```
 
 ## Требования
 
