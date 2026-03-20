@@ -75,10 +75,13 @@ def messages(cur, start_date, end_date):
     query = """
         SELECT 
             DATE_TRUNC('day', action_date) as day,
-            COUNT(*) as total_messages,
-            (COUNT(*) FILTER (where user_id is null) * 100.0 / nullif(COUNT(*), 0)) as anon_messages_percentage
+            COUNT(*)::numeric(10,0) as total_messages,
+            round(
+            COUNT(*) FILTER (where user_id is null) * 100.0 / nullif(COUNT(*), 0),
+            2) as anon_messages_percentage
             from logs
-            where action_type = 'message_create' and action_date >= %s and action_date <= %s + interval '1 day' - interval '1 second'
+            where action_type = 'message_create' 
+                and action_date >= %s and action_date <= %s + interval '1 day' - interval '1 second'
             group by day
             order by day;
         """
@@ -92,10 +95,10 @@ def topic_changes(cur, start_date, end_date):
         with daily_topics as (
             select 
                 DATE_TRUNC('day', action_date) as day,
-                sum(case when action_type = 'topic_create' and server_response = true then 1 else 0 end) as created,
+                sum(case when action_type = 'create_topic' and server_response = true then 1 else 0 end) as created,
                 sum(case when action_type = 'topic_delete' and server_response = true then 1 else 0 end) as deleted
             from logs
-            where action_type in ('topic_create', 'topic_delete') and action_date >= %s and action_date <= %s + interval '1 day' - interval '1 second'
+            where action_type in ('create_topic', 'topic_delete') and action_date >= %s and action_date <= %s + interval '1 day' - interval '1 second'
             group by DATE_TRUNC('day', action_date)
             ),
         cumulative as (
@@ -110,7 +113,9 @@ def topic_changes(cur, start_date, end_date):
             day,
             total_topics,
             lag(total_topics) over (order by day) as previous_total,
-            coalesce((total_topics - lag(total_topics) over (order by day)) * 100.0 / nullif(lag(total_topics) over (order by day), 0), 0) as percentage_change
+            round(coalesce((total_topics - lag(total_topics) over (order by day)) * 100.0 / 
+            nullif(lag(total_topics) over (order by day), 0), 0), 
+            2) as percentage_change
         from cumulative
         order by day;
         """
