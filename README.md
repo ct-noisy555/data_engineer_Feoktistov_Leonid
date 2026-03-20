@@ -28,6 +28,12 @@ data_engineer_Feoktistov_Leonid/
 - **Python 3.8+**
 - **PostgreSQL 15** (запускается в Docker)
 
+## Установка зависимостей
+
+``` bash
+pip install -r requirements.txt
+```
+
 ## Запуск базы данных
 Запуск PostgreSQL в Docker:
 ``` bash
@@ -55,5 +61,13 @@ python load_dataset.py
 ``` bash
     aggregated_logs.csv
 ```
+## Команда для проверки:
 
+```bash
+docker-compose up -d
+pip install -r requirements.txt
+python data_generator_script.py
+python load_dataset.py
+python data_aggregation_script.py
+```
 
