@@ -19,7 +19,10 @@ data_engineer_Feoktistov_Leonid/
 ├── messages.csv
 ├── logs.csv                   # сгенерированные логи
 │
-└── aggregated_logs.csv        # результат агрегации
+├── aggregated_logs.csv        # результат агрегации
+│
+└── requirements.txt           # библиотеки для работы
+
 ```
 
 ## Требования
