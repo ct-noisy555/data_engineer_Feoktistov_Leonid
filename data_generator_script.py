@@ -12,7 +12,7 @@ Faker.seed(555)
 fake = Faker('ru_RU')
 
 #константы действий пользователя из первого пункта задания
-users_activity_types = ['first_visit', 'registration', 'login', 'logout', 'topic_create', 'topic_visit', 'topic_delete', 'message_create']
+users_activity_types = ['first_visit', 'registration', 'login', 'logout', 'create_topic', 'topic_visit', 'topic_delete', 'message_create']
 
 #количество дней между первой и последней датой для генерации данных
 first_date = datetime(2026, 2, 1)
@@ -102,7 +102,7 @@ def generate_topics(users_df):
     current_topic_id = 1
 
     for day in range(delta):  # итерация по дням для генерации данных о темах
-        topic_create_errors = 0
+        create_topic__errors = 0
         daily_topics_creations_number = random.randint(users_activity_min, 10)
         for topic in range(daily_topics_creations_number): # итерация по количеству созданных тем в течение дня  
             hour = random.randint(0, 23)
@@ -111,17 +111,17 @@ def generate_topics(users_df):
             creation_time = first_date + timedelta(days=day, hours=hour, minutes=minute, seconds=second)
 
             is_error = False
-            if topic_create_errors < topic_errors_min:                         #ранее была логика, что создаются первые две ошибки/был риск оказаться без ошибок вовсе
+            if create_topic__errors < topic_errors_min:                         #ранее была логика, что создаются первые две ошибки/был риск оказаться без ошибок вовсе
                 if random.random() < 0.3:                                      #теперь "случайно" создаются ошибки, а если остается мало тем на день - принудительно.
                     is_error = True 
-                    topic_create_errors += 1
+                    create_topic__errors += 1
 
             remaining_attempts = daily_topics_creations_number - topic + 1
-            remaining_errors = topic_errors_min - topic_create_errors
+            remaining_errors = topic_errors_min - create_topic__errors
 
             if remaining_errors > remaining_attempts:
                 is_error = True
-                topic_create_errors += 1
+                create_topic__errors += 1
 
             if is_error:
                 topics_logs.append({
@@ -150,7 +150,7 @@ def generate_topics(users_df):
                     'user_id': users_ids[-1],
                     'topic_id': current_topic_id - 1,
                     'message_id': None,
-                    'action_type': 'topic_create',
+                    'action_type': 'create_topic',
                     'server_response': True,
                     'action_date': creation_time
                 })  
@@ -240,7 +240,7 @@ def generate_logs(users_df, topics_df, first_visit_logs, registration_logs, topi
     logs.extend(topic_logs)
     logs.extend(message_logs)
 
-    activity_types_to_remove = ['first_visit', 'registration', 'topic_create', 'message_create']
+    activity_types_to_remove = ['first_visit', 'registration', 'create_topic', 'message_create']
     remaining_actions = [action for action in users_activity_types if action not in activity_types_to_remove] #оставляем в списке типов действий только те, которые не были учтены в логах при генерации пользователей, тем и сообщений
 
     for day in range(delta): # итерация по дням для генерации данных о действиях пользователей
