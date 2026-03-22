@@ -1,4 +1,4 @@
-﻿day,new_accounts,anon_messages_percentage,total_messages,total_topics,previous_total,percentage_change
+﻿day,new_accounts,total_messages,anon_messages_percentage,total_topics,previous_total,percentage_change
 2026-02-01,6,6,50.00,-6,,0.00
 2026-02-02,8,8,50.00,-15,-6,150.00
 2026-02-03,7,9,55.56,-22,-15,46.67
