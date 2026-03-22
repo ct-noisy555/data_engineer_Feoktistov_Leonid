@@ -1,30 +1,32 @@
-# Скрипт для агрегации логов форума и сохранения их в CSV файл
-# агрегация данных по заданию
-# сохранение в CSV файл
-
 import pandas as pd
 import psycopg2
 import argparse
 from datetime import datetime
 
 def date_format_checker(date_string):
+    separators = ['-', '/', '.', ' ']
+    formats = ['%Y%m%d']
     if len(date_string) == 8 and date_string.isdigit():
-        for fmt in ['%d%m%Y', '%Y%m%d', '%m%d%Y']:
-            try:
-                return datetime.strptime(date_string, fmt)
-            except ValueError:
-                continue
-
-    for sep in ['-', '/', '.', ' ']:
-        for fmt in ['%d{sep}%m{sep}%Y', '%Y{sep}%m{sep}%d', '%m{sep}%d{sep}%Y']:   # попробую избавиться от возможной путаницы порядка дат, если успею до сдачи задания. Пока для России норм, первым стоит
-            try:
-                return datetime.strptime(date_string, fmt.format(sep=sep))
-            except ValueError:
-                continue
-    raise ValueError(f"Не удалось распознать формат даты: {date_string}")
-    
+        for '--region' in args and args.region in ['ISO-8601', 'Asian', 'EU', 'US', 'RU']:
+            if args.region == 'ISO-8601' or args.region == 'Asian':
+                for sep in separators:
+                    formats.append(f'%Y{sep}%m{sep}%d')
+            elif args.region == 'EU' or args.region == 'RU':
+                for sep in separators:
+                    formats.append(f'%d{sep}%m{sep}%y')
+            elif args.region == 'US':
+                for sep in separators:
+                    formats.append(f'%m{sep}%d{sep}%y')
+    for fmt in formats:
+        try:
+            return datetime.strptime(date_string, fmt)
+        except ValueError as e:
+            continue
+    raise ValueError(f"Дата '{date_string}' не соответствует ни одному из поддерживаемых форматов для региона '{args.region}'. Поддерживаемые форматы: {formats}")
+                
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Скрипт для агрегации логов форума и сохранения их в CSV файл')
+    parser.add_argument('--region', default='ISO-8601', help='Региональный формат даты (по умолчанию ISO-8601)')
     parser.add_argument('--start_date', required=True, help='Начальная дата')
     parser.add_argument('--end_date', required=True, help='Конечная дата')
     parser.add_argument('--output_file', default='aggregated_logs.csv', help='Имя выходного CSV файла')
