@@ -3,36 +3,38 @@ import psycopg2
 import argparse
 from datetime import datetime
 
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Скрипт для агрегации логов форума и сохранения их в CSV файл')
+    parser.add_argument('--start_date', required=True, help='Начальная дата')
+    parser.add_argument('--end_date', required=True, help='Конечная дата')
+    parser.add_argument('--region', default='ISO-8601', help='Региональный формат даты (по умолчанию ISO-8601)')
+    parser.add_argument('--output_file', default='aggregated_logs.csv', help='Имя выходного CSV файла')
+
+    return parser.parse_args()
+
 def date_format_checker(date_string):
     separators = ['-', '/', '.', ' ']
-    formats = ['%Y%m%d']
-    if len(date_string) == 8 and date_string.isdigit():
-        for '--region' in args and args.region in ['ISO-8601', 'Asian', 'EU', 'US', 'RU']:
-            if args.region == 'ISO-8601' or args.region == 'Asian':
-                for sep in separators:
-                    formats.append(f'%Y{sep}%m{sep}%d')
-            elif args.region == 'EU' or args.region == 'RU':
-                for sep in separators:
-                    formats.append(f'%d{sep}%m{sep}%y')
-            elif args.region == 'US':
-                for sep in separators:
-                    formats.append(f'%m{sep}%d{sep}%y')
+    formats = []
+    if '--region' in args and args.region in ['ISO-8601', 'Asian', 'EU', 'US', 'RU']:
+        if args.region == 'ISO-8601' or args.region == 'Asian':
+            formats = ['%Y%m%d']
+            for sep in separators:
+                formats.append(f'%Y{sep}%m{sep}%d')
+        elif args.region == 'EU' or args.region == 'RU':
+            formats = ['%d%m%Y']
+            for sep in separators:
+                formats.append(f'%d{sep}%m{sep}%Y')
+        elif args.region == 'US':
+            formats = ['%m%d%Y']
+            for sep in separators:
+                formats.append(f'%m{sep}%d{sep}%Y')
     for fmt in formats:
         try:
             return datetime.strptime(date_string, fmt)
         except ValueError as e:
             continue
     raise ValueError(f"Дата '{date_string}' не соответствует ни одному из поддерживаемых форматов для региона '{args.region}'. Поддерживаемые форматы: {formats}")
-                
-def parse_arguments():
-    parser = argparse.ArgumentParser(description='Скрипт для агрегации логов форума и сохранения их в CSV файл')
-    parser.add_argument('--region', default='ISO-8601', help='Региональный формат даты (по умолчанию ISO-8601)')
-    parser.add_argument('--start_date', required=True, help='Начальная дата')
-    parser.add_argument('--end_date', required=True, help='Конечная дата')
-    parser.add_argument('--output_file', default='aggregated_logs.csv', help='Имя выходного CSV файла')
-
-    return parser.parse_args()
-    
+                  
 def validate_dates(args):
     try:
         start_date = date_format_checker(args.start_date)
