@@ -12,33 +12,33 @@ def parse_arguments():
 
     return parser.parse_args()
 
-def date_format_checker(date_string):
+def date_format_checker(date_string, args):
     separators = ['-', '/', '.', ' ']
     formats = []
-    if '--region' in args and args.region in ['ISO-8601', 'Asian', 'EU', 'US', 'RU']:
-        if args.region == 'ISO-8601' or args.region == 'Asian':
-            formats = ['%Y%m%d']
-            for sep in separators:
-                formats.append(f'%Y{sep}%m{sep}%d')
-        elif args.region == 'EU' or args.region == 'RU':
-            formats = ['%d%m%Y']
-            for sep in separators:
-                formats.append(f'%d{sep}%m{sep}%Y')
-        elif args.region == 'US':
-            formats = ['%m%d%Y']
-            for sep in separators:
-                formats.append(f'%m{sep}%d{sep}%Y')
+    region = args.region 
+    if region == 'ISO-8601' or region == 'Asia':
+        formats.append('%Y%m%d')
+        for sep in separators:
+            formats.append(f'%Y{sep}%m{sep}%d')
+    elif region == 'EU' or region == 'RU':
+        formats.append('%d%m%Y')
+        for sep in separators:
+            formats.append(f'%d{sep}%m{sep}%Y')
+    elif region == 'US':
+        formats.append('%m%d%Y')
+        for sep in separators:
+            formats.append(f'%m{sep}%d{sep}%Y')
     for fmt in formats:
         try:
             return datetime.strptime(date_string, fmt)
         except ValueError as e:
             continue
-    raise ValueError(f"Дата '{date_string}' не соответствует ни одному из поддерживаемых форматов для региона '{args.region}'. Поддерживаемые форматы: ISO-8601, Asian, EU, US, RU")
+    raise ValueError(f"Дата '{date_string}' не соответствует ни одному из поддерживаемых форматов для региона '{args.region}'. Поддерживаемые форматы: ISO-8601, Asia, EU, US, RU")
                   
 def validate_dates(args):
     try:
-        start_date = date_format_checker(args.start_date)
-        end_date = date_format_checker(args.end_date)
+        start_date = date_format_checker(args.start_date, args)
+        end_date = date_format_checker(args.end_date, args)
         if start_date > end_date:
             raise ValueError("Начальная дата не может быть позже конечной даты.")
         return start_date, end_date
@@ -92,7 +92,7 @@ def messages(cur, start_date, end_date):
     cur.execute(query, (start_date, end_date))
     message_df = cur.fetchall()
 
-    return pd.DataFrame(message_df, columns=['day', 'anon_messages_percentage', 'total_messages'])
+    return pd.DataFrame(message_df, columns=['day', 'total_messages', 'anon_messages_percentage'])
 
 def topic_changes(cur, start_date, end_date):
     query = """
