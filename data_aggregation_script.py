@@ -33,7 +33,7 @@ def date_format_checker(date_string):
             return datetime.strptime(date_string, fmt)
         except ValueError as e:
             continue
-    raise ValueError(f"Дата '{date_string}' не соответствует ни одному из поддерживаемых форматов для региона '{args.region}'. Поддерживаемые форматы: {formats}")
+    raise ValueError(f"Дата '{date_string}' не соответствует ни одному из поддерживаемых форматов для региона '{args.region}'. Поддерживаемые форматы: ISO-8601, Asian, EU, US, RU")
                   
 def validate_dates(args):
     try:
